@@ -5,7 +5,10 @@ metadata:
 spec:
   accessModes:
     - ReadWriteOnce
-  volumeMode: Block
+  volumeMode: Block # This will bind to a raw block volume.
+    # A raw block is like an unformatted raw device. And then you can format it
+    # with a file system so you can use it. Only some apps, especially some database,
+    # write directly to the raw volume because it gives them faster performance.
   storageClassName: ps-gcp-fast
   resources:
     requests:
@@ -28,6 +31,10 @@ spec:
       - "-c"
       - "sleep 60m"
       volumeDevices:
-        - devicePath: /dev/block
+        - devicePath: /dev/block # Where we don't mount the volume to the file system,
+              # this comes in as a volume device we mounted into a device path.
           name: block-vol
       imagePullPolicy: IfNotPresent
+
+# List files in the container:
+# kubectl exec block-pod -- ls -l /dev
