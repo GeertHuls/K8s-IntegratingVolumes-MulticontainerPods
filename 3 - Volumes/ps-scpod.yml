@@ -1,14 +1,16 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: pvc-htmlvol
+  name: pvc-htmlvol # This pvc refers the to ps-sc.yml storage class!
 spec:
   storageClassName: "ps-gcp-fast"
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 25Gi
+      storage: 25Gi # This is now dynamically bound to the storage class whereas
+                    # the storage class will create this on the spot (cfr WaitForFirstConsumer binding).
+                    # The ps-pv.yml is statically bound (known upfront).
 ---
 apiVersion: v1
 kind: Pod
@@ -18,7 +20,7 @@ metadata:
     app: stg
 spec:
   volumes:
-    - name: htmlvol
+    - name: htmlvol # The pod is creating a volume based on the pvc above.
       persistentVolumeClaim:
         claimName: pvc-htmlvol
   containers:
@@ -27,21 +29,24 @@ spec:
       ports:
         - containerPort: 80
           name: "http-server"
-      volumeMounts:
+      volumeMounts: # The container mounts the volume on the pod.
         - mountPath: "/usr/share/nginx/html"
-          name: htmlvol
+          name: htmlvol # Refers to the name of the pod volume.
     - name: helper-ctr
       image: ubuntu
       command:
       - /bin/bash
       - "-c"
       - "sleep 60m"
-      volumeMounts:
+      volumeMounts: # Here's the second container mounting the volume on the pod.
       - mountPath: /data
-        name: htmlvol
+        name: htmlvol # Refers to the name of the pod volume.
+      # This is an example of a ReadWriteOnce PVC allows as many containers as you like to use it,
+      # as long as it is in the same pod.
+      # On the other hand, multiple pods are not able to use this PVC.
 ---
 apiVersion: v1
-kind: Service
+kind: Service # This service is used to expose it to the internet.
 metadata:
   name: lb
 spec:
@@ -53,6 +58,9 @@ spec:
       targetPort: 80
   type: LoadBalancer
 
-
+# Inspect the pod:
+# kubectl describe pod sc-pod
+# Open bash prompt in running container:
+# kubectl exec -it sc-pod -c helper-ctr /bin/bash
 
 

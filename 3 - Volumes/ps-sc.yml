@@ -3,9 +3,38 @@ apiVersion: storage.k8s.io/v1
 metadata:
   name: ps-gcp-fast
   annotations:
-    storageclass.kubernetes.io/is-default-class: "true"
-provisioner: kubernetes.io/gce-pd
-volumeBindingMode: WaitForFirstConsumer
-parameters:
-  type: pd-ssd
-  replication-type: none
+    storageclass.kubernetes.io/is-default-class: "true" # Set this as the default default class for the cluster.
+        # So any pvc that doesn't request a particular class of storage gets the cluster's default class.
+        # List storage classes: kubectl get sc (default classes are different per cloud platform).
+provisioner: kubernetes.io/gce-pd # Defines the plugin (goolge compute engine persistent disc).
+                                  # This will be different for other platforms. Find out which plugin is suited:
+                                  # Search on google: 'list of kubernetes volume plugins'.
+volumeBindingMode: WaitForFirstConsumer # This volume binding mode will hold off on the actual creation
+                          # of the back end volume and the PV until a pod is started that uses it.
+parameters: # Anything under parameters, relates to specific attributes on your storage back end.
+            # What you put in here depends 100% on your plugin on your back end.
+            # Example AWS:
+            # parameters:
+            #   type: io1
+            #   iopsPerBG: "10"
+            #   encrypted: "true"
+            # Above you can specify wheter to encrypt the volume and which encryption keys to use.
+
+            # ScaleIO example:
+            # parameters:
+            #   gateway: https://scaleio-prod1:443/api
+            #   system: scaleio-prod1
+            #   storagePool: fast-db
+            #   storageMode: ThinProvisioned
+            #   readOnly: false
+            #   ...
+            # Depens on what the back end support through the plugin.
+  type: pd-ssd # persistent disk of type ssd offered on the google cloud
+  replication-type: none # Here we specifiy that we don't want to have volumes in this class to be regional discs.
+
+# Apply this:
+# kubectl apply -f ps-sc.yml
+# kubectl get sc
+# --> now you have default storage classes
+# Edit the original, and remove the default property:
+# kubectl edit sc hostpath (hostpath is the name of the existing storage class)
