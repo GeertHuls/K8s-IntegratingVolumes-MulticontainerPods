@@ -5,9 +5,21 @@ metadata:
 spec:
   accessModes:
   - ReadWriteOnce
+    # there are 3 access modes:
+    # - ReadWriteOnce: this pv can be claimed once in read-write mode by 1 pod
+    # - ReadWriteMany: can be used lot of times
+    # - ReadOnlyMany: can be read by a lot of pod
+    # Not all modes are supported, eg block support volumes don't support ReadWriteMany mode.
+    # File based volumes like NFS or object volumes they ussually do.
+    # Check the storage system's documentation to know which mode is supported.
   storageClassName: ps-fast
   capacity:
     storage: 50Gi
-  persistentVolumeReclaimPolicy: Retain
-  gcePersistentDisk:  
-    pdName: ps-vol  
+  persistentVolumeReclaimPolicy: Retain # If the pvc is removed, then this pv is still active.
+                                # Keep it around in a protected state where no other pvcs can bind to it.
+                                # The other mode next to Retain is Delete. The delete option will both delete
+                                # the pv as well as the volume on the storage backend.
+  gcePersistentDisk: # This is the name of plugin of the backend.
+    pdName: ps-vol   # Is a volume of persistent disc on the google cloud engine.
+                     # Docs for more plugins: https://kubernetes.io/docs/concepts/storage/volumes/#types-of-volumes
+                     # other plugins are: awsElasticBlockStore, azureDisk, azureFile, nfs, vshpereVolume.

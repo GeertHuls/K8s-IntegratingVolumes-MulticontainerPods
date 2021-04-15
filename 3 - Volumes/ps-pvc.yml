@@ -1,11 +1,15 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: ps-pvc
+  name: ps-pvc # Claims the pv defined in ps-pvc.yml.
+    # First run: kubectl apply -f ps-pv.yml
+    # The run: kubectl apply -f ps-pvc.yml
 spec:
   accessModes:
   - ReadWriteOnce
   storageClassName: ps-fast
   resources:
     requests:
-      storage: 50Gi
+      storage: 50Gi # This is statically bound. The pv needs to of the
+                    # same capacity or more. Ideally it would be the same
+                    # amount of storage.

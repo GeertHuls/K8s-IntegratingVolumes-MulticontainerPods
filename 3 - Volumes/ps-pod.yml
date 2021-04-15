@@ -6,7 +6,7 @@ spec:
   volumes:
     - name: fast50g
       persistentVolumeClaim:
-        claimName: ps-pvc
+        claimName: ps-pvc # This binds to the pvc in ps-pvc.yml.
   containers:
   - image: ubuntu:latest
     name: ctr1
