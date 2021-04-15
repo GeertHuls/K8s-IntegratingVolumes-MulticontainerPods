@@ -1,16 +1,16 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: clone-pvc
+  name: clone-pvc # This pod is a clone of the original-pod.yml.
 spec:
   accessModes:
     - ReadWriteOnce
-  storageClassName: clone-sc
+  storageClassName: clone-sc # Based on the same storage class.
   resources:
     requests:
       storage: 10Gi
   dataSource:
-    kind: PersistentVolumeClaim
+    kind: PersistentVolumeClaim # This create a clone of original-pvc.
     name: origin-pvc
 ---
 kind: Pod

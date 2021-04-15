@@ -5,7 +5,7 @@ metadata:
 spec:
   accessModes:
     - ReadWriteOnce
-  storageClassName: clone-sc
+  storageClassName: clone-sc # Clone storage classes are (only?) avaible on azure.
   resources:
     requests:
       storage: 10Gi
