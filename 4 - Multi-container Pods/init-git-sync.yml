@@ -30,7 +30,7 @@ spec:
       mountPath: /usr/share/nginx
   volumes:
   - name: html
-    emptyDir: {}
+    emptyDir: {} # Shared volume.
 ---
 apiVersion: v1
 kind: Service

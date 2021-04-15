@@ -5,12 +5,34 @@ metadata:
   labels:
     app: initializer
 spec:
-  initContainers:
+  initContainers: # The init container runs once, before the main container is up and running.
+                  # And it must complete so that the main container can start.
+                  # Init containers run sequencially.
+                  # Pod restarts if init container fails (also depends on restart policy).
+                  # Init containers need to run idempontent code.
   - name: init-ctr
     image: busybox
     command: ['sh', '-c', 'until nslookup pluralsight-ftw; do echo waiting for pluralsight-ftw service; sleep 1; done; echo Service found!']
-  containers:
+  containers: # Then the main containers will run.
+              # Main containers run in parallel.
     - name: web-ctr
       image: nigelpoulton/web-app:1.0
       ports:
         - containerPort: 8080
+
+# Start this pod:
+# kubectl apply -f init-pod.yml
+# kubectl get pods --watch
+# log the container inside the pod:
+# kubectl logs ps-init -c init-ctr
+
+# Create the service for this pod:
+# kubectl apply -f init-svc.yml
+
+# Verify that the init container is completed:
+# kubectl describe pods ps-init
+
+# Explain command examples:
+# kubectl explain pods
+# kubectl explain pods --recursive
+# kubectl explain pods.spec.restartPolicy

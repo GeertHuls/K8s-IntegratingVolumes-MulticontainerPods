@@ -4,7 +4,7 @@ metadata:
   name: pluralsight-ftw
 spec:
   selector:
-    app: initializer
+    app: initializer # This service is meant for init-pod.yml.
   ports:
     - protocol: TCP
       port: 80
