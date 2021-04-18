@@ -4,12 +4,18 @@ metadata:
   name: web
 spec:
   containers:
-  - name: web-ctr
-    image: nigelpoulton/nginxadapter:1.0
+  - name: web-ctr  # Best practise to list the main container first.
+    image: nigelpoulton/nginxadapter:1.0 # https://hub.docker.com/r/nigelpoulton/nginxadapter
+              # The web app exposes a /nginx_status end point which for prometheus logs.
     ports:
     - containerPort: 80
   - name: transformer
-    image: nginx/nginx-prometheus-exporter
-    args: ["-nginx.scrape-uri","http://localhost/nginx_status"]
+    image: nginx/nginx-prometheus-exporter # Official nginx web app which transforms nginx metrics to prometheus metrics.
+    args: ["-nginx.scrape-uri","http://localhost/nginx_status"] # This is the nginx_status end point from the main container.
     ports:
     - containerPort: 9113
+
+# Open bash command prompt inside the pod:
+# kubectl exec -it web /bin/bash
+# > curl localhost/nginx_status
+# > curl localhost:9113/metrics  # (this is the transformer container)
