@@ -14,7 +14,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: ps-ambassador
+  name: ps-ambassador # The container in the ambassador-app.yml will proxy this end point.
 spec:
   selector:
     app: ambassador

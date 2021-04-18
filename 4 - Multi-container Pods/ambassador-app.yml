@@ -5,7 +5,12 @@ metadata:
 spec:
   containers:
   - name: main-app
-    image: nigelpoulton/curl:1.0
+    image: nigelpoulton/curl:1.0 # This app is used to perform curl requests to http://localhost:9000.
     command: ["sleep", "3600"]
   - name: ambassador
-    image: nigelpoulton/nginx-ambassador:1.0
+    image: nigelpoulton/nginx-ambassador:1.0 # The app start a web app on http://localhost:9000.
+                # Next it will proxy the container of the app running in external.yml, under the endpoint of http://ps-ambassador.
+
+# Open a prompt in the pod:
+# kubectl exec -it ambassador-app /bin/bash
+# > curl localhost:9000
