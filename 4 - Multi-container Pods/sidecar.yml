@@ -13,6 +13,9 @@ spec:
       mountPath: /usr/share/nginx/
   - image: k8s.gcr.io/git-sync:v3.1.5
     name: init-sync-ctr
+    # lifecyle:         # Planned feature to add side car type of container.
+    #   type: sidecar   # A side car container will run once before the main container and when
+                        # the main container runs, then the side car will continue running along side.
     volumeMounts:
     - name: html
       mountPath: /tmp/git
