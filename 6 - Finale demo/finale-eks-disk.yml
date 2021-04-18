@@ -31,7 +31,7 @@ metadata:
   namespace: default
 subjects:
 - kind: ServiceAccount
-  name: "reader"
+  name: "reader"  # Binds to the reader service account on line 15.
   namespace: default
 roleRef:
   kind: Role 
@@ -45,7 +45,7 @@ metadata:
 spec:
   accessModes:
   - ReadWriteOnce
-  storageClassName: finale1-gcp-pd
+  storageClassName: finale1-gcp-pd # References the storage class on line 4.
   resources:
     requests:
       storage: 25Gi
@@ -68,20 +68,26 @@ kind: Pod
 metadata:
   name: finale-1
   labels:
-    app: finale-1
+    app: finale-1 # Matches the load balancer service on line 59.
 spec:
   serviceAccountName: reader
   volumes:
   - name: pvc-finale-1
-#    emptyDir: {}
+#    emptyDir: {}   # Use the empty dir instead of the persistent volume claim if working on
+                    # a local k8s cluster and not having access to a proper external storage.
+                    # Also the storage classe and pvc won't be necessary either.
+                    # The emptyDir will mount  a volume from an empty directory on the host.
     persistentVolumeClaim:
       claimName: pvc-finale-1
-  securityContext:
+  securityContext:  # These security context here is because mounting an external storage from
+                    # some platforms can mess with permissions and stop some containers running later.
+                    # So this may or may not be needed, depending on the underlying infrastructure.
     fsGroup: 0
     runAsUser: 0
-  initContainers:
+  initContainers: # There are 3 init container.
   - name: init-pv  # Looks for PV
-    image: nigelpoulton/k8s-api-proxy:1.0
+    image: nigelpoulton/k8s-api-proxy:1.0 # This checks if the PVC exists. In the reader service account,
+                                          # the container is authorized to list the pvcs.
     command: ["sh", "-c"]
     args: ["until kubectl get pvc pvc-finale-1; do echo waiting for PVC; sleep 1; done; echo PVC found!"]
   - name: init-sync   # Does an initial sync from GH
@@ -103,18 +109,20 @@ spec:
       value: "html"
     - name: GIT_SYNC_ONE_TIME
       value: "true"  
-  - name: init-svc  # Looks for Service called finale-svc
+  - name: init-svc  # Looks for Service called finale-svc.
     image: busybox
-    command: ['sh', '-c', 'until nslookup finale-svc; do echo waiting for finale-svc service; sleep 1; done; echo Service found!']  
+    command: ['sh', '-c', 'until nslookup finale-svc; do echo waiting for finale-svc service; sleep 1; done; echo Service found!']
+                    # Here we're looking up the service querying dns (nslookup) rather than using kubernetes api.
+                    # This is because the service account is not allowed to list services.
   containers:
-  - name: app
+  - name: app # Main app container!
     image: nginx
     ports:
       - containerPort: 80
     volumeMounts:
       - mountPath: "/usr/share/nginx"
         name: pvc-finale-1
-  - name: sidecar-sync
+  - name: sidecar-sync  # The side car container, keep the web app in-sync.
     image: k8s.gcr.io/git-sync:v3.1.5
     volumeMounts:
     - name: pvc-finale-1
@@ -128,3 +136,10 @@ spec:
       value: "1"
     - name: GIT_SYNC_DEST
       value: "html"
+
+# Troubleshooting pod.
+# kubectl logs finale-1
+# Troubleshooting containers inside pod.
+# kubectl logs finale-1 -c init-pv
+# kubectl logs finale-1 -c init-sync
+# kubectl logs finale-1 -c init-svc
