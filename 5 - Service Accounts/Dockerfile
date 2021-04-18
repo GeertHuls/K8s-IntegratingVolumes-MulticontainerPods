@@ -15,3 +15,24 @@ RUN chmod +x /ambassador.sh
 
 # Set app to run when container is started
 ENTRYPOINT /ambassador.sh
+
+# View config
+# kubectl config view
+# Cluster info
+# kubectl cluster-info
+# Config located at: C:\Users\<username>\.kube\config
+
+# View current context
+# kubectl config current-context
+# View pod yaml
+# kubectl get pods -o yaml
+# List secret of token
+# kubectl get secret default-token-dmcf6
+# kubectl describe secret default-token-dmcf6
+
+# Show full yaml spec of service account
+# kubectl get sa default -o yaml
+
+# Service account secrets are injected into every pod:
+# kubectl exec -it <podname> bash
+# > ls /var/run/secrets/kubernetes.io/serviceaccount/
