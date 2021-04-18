@@ -2,7 +2,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   namespace: default
-  name: svc-ro
+  name: svc-ro # This role contains several permissions.
 rules:
 - apiGroups: [""]
   resources: ["services"]
@@ -15,9 +15,22 @@ metadata:
   namespace: default
 subjects:
 - kind: ServiceAccount
-  name: "service-reader"
+  name: "service-reader" # This is the name of a role binding which can be used to create a new service account.
   namespace: default
 roleRef:
   kind: Role 
   name: svc-ro 
   apiGroup: rbac.authorization.k8s.io
+
+# Describe service account.
+# kubectl describe role svc-ro
+
+# View custom cluster role binding.
+# kubectl get clusterrolebindings
+# Cfr binding: docker-for-desktop-binding --> this will make all service account admins!
+# Example to remove a binding.
+# kubectl delete clusterrolebinding <name> 
+
+# Create new service account
+# kubectl create servcieaccount service-reader
+# kubectl describe sa service-reader
